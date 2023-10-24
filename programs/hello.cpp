@@ -3,6 +3,6 @@
 int main() {
     char c;
     int i;
-    c = 'h';
-    i = c + 3;
+    //c = 'h';
+    //i = c + 3;
 } // main

@@ -1,6 +1,5 @@
 import sys
-from Token import Token, SetTokens
-from TokenType import TokenType
+from Token import Token
 
 class Lexer:
 
@@ -17,9 +16,11 @@ class Lexer:
     eolnCh = '\n'
     eofCh = '\004'
 
-    tokens = Token(TokenType.EOF, '<<EOF>>')
+    tokenizer = None
 
-    setTokens = SetTokens()
+    #tokens = Token(TokenType.EOF, '<<EOF>>')
+
+    #setTokens = SetTokens()
 
     #tokens = Token(None, None)
 
@@ -48,17 +49,18 @@ class Lexer:
         return self.line[self.col]
 
 
-    def next(self): # return next token
+    def next(self, tokenizer): # return next token
+        self.tokenizer = tokenizer
         while True:
             if self.isLetter(self.ch): # ident or keyword
                 spelling = self.concat(self.letters + self.digits)
-                return self.tokens.keyword(spelling)
+                return self.tokenizer.tokens.keyword(spelling)
             elif self.isDigit(self.ch): # int or float literal
                 number = self.concat(self.digits)
                 if (self.ch != '.'): # int literal
-                    return self.tokens.mkIntLiteral(self.number)
+                    return self.tokenizer.tokens.mkIntLiteral(self.number)
                 self.number += self.concat(self.digits)
-                return self.tokens.mkFloatLiteral(self.number)
+                return self.tokenizer.tokens.mkFloatLiteral(self.number)
             else:
                 match self.ch:
                     case ' ' | '\t' | '\r' | self.eolnCh:
@@ -67,7 +69,7 @@ class Lexer:
                     case '/': # divide or comment
                         self.ch = self.nextChar()
                         if self.ch != '/':
-                            return self.setTokens.divideTok
+                            return self.tokens.divideTok
                         # comment
                         while True:
                             self.ch = self.nextChar()
@@ -81,54 +83,54 @@ class Lexer:
                         self.ch = self.nextChar()
                         return Token.mkCharLiteral(f'{ch1}')
                     case self.eofCh:
-                        return self.setTokens.eofTok
+                        return self.tokenizer.eofTok
                     case '+':
                         self.ch = self.nextChar()
-                        return self.setTokens.plusTok
+                        return self.tokenizer.plusTok
 
                         # - * () {} ; , exercise
                     case '-':
                         self.ch = self.nextChar()
-                        return self.setTokens.minusTok
+                        return self.tokenizer.minusTok
                     case '*':
                         self.ch = self.nextChar()
-                        return self.setTokens.multiplyTok
+                        return self.tokenizer.multiplyTok
                     case '(':
                         self.ch = self.nextChar()
-                        return self.setTokens.leftParentTok
+                        return self.tokenizer.leftParentTok
                     case ')':
                         self.ch = self.nextChar()
-                        return self.setTokens.rightParentTok
+                        return self.tokenizer.rightParentTok
                     case '{':
                         self.ch = self.nextChar()
-                        return self.setTokens.leftBraceTok
+                        return self.tokenizer.leftBraceTok
                     case '}':
                         self.ch = self.nextChar()
-                        return self.setTokens.rightBraceTok
+                        return self.tokenizer.rightBraceTok
                     case ';':
                         self.ch = self.nextChar()
-                        return self.setTokens.semicolonTok
+                        return self.tokenizer.semicolonTok
                     case ',':
                         self.ch = self.nextChar()
-                        return self.setTokens.commaTok
+                        return self.tokenizer.commaTok
                     case '&':
                         self.check('&')
-                        return self.setTokens.andTok
+                        return self.tokenizer.andTok
                     case '|':
                         self.check('|')
-                        return self.setTokens.orTok
+                        return self.tokenizer.orTok
                     case '=':
-                        return self.chkOpt('=', self.setTokens.assignTok, self.setTokens.eqeqTok)
+                        return self.chkOpt('=', self.tokenizer.assignTok, self.tokenizer.eqeqTok)
                         # < > ! exercise
                     case '<':
-                        return self.chkOpt('<', self.setTokens.ltTok, self.setTokens.lteqTok)
+                        return self.chkOpt('<', self.tokenizer.ltTok, self.tokenizer.lteqTok)
                     case '>':
-                        return self.chkOpt('>', self.setTokens.glTok, self.setTokens.gteqTok)
+                        return self.chkOpt('>', self.tokenizer.glTok, self.tokenizer.gteqTok)
                     case '!':
-                        return self.chkOpt('!', self.setTokens.notTok, self.setTokens.noteqTok)
+                        return self.chkOpt('!', self.tokenizer.notTok, self.tokenizer.noteqTok)
                     case _:
                         self.error(f'Illegal character {self.ch}')
-        return Token(TokenType.EOF, '<<EOF>>')
+        #return Token(TokenType.EOF, '<<EOF>>')
     def isLetter(self, c):
         return c.isalpha()
 
@@ -149,7 +151,7 @@ class Lexer:
         while True:
             r += self.ch
             self.ch = self.nextChar()
-            if set.find(self.ch) >=0:
+            if set.find(self.ch) == -1:
                 break
         return r
 

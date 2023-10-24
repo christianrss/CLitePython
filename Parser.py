@@ -1,6 +1,4 @@
 import sys
-import Token
-import Lexer
 
 class Parser:
 

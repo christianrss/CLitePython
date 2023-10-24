@@ -1,14 +1,14 @@
 import sys
 from Lexer import Lexer
-from Token import Token, SetTokens
-from TokenType import TokenType
+from Tokenizer import Tokenizer
 
 if __name__ == '__main__':
     lexer = Lexer(sys.argv[1])
-    tok = lexer.next()
+    tokenizer = Tokenizer()
 
-    setTokens = SetTokens()
+    tok = lexer.next(tokenizer)
 
-    while tok != setTokens.eofTok:
-        print(f'{tok.toString()}\n')
-        tok = lexer.next()
+    while tok != tokenizer.eofTok:
+        if tok != None:
+            print(f'{tok.toString()}\n')
+        tok = lexer.next(tokenizer)
